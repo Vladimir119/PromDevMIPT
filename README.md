@@ -14,12 +14,6 @@
 ./deploy.sh
 ```
 
-Для Windows PowerShell:
-
-```powershell
-.\deploy.ps1
-```
-
 2. Проверить работу:
 
 ```bash
@@ -39,8 +33,3 @@ curl http://127.0.0.1:5000/logs
 - `k8s/log-agent-daemonset.yaml` — DaemonSet для сбора логов с узлов
 - `k8s/app-cronjob.yaml` — CronJob для архивирования логов каждые 10 минут
 - `k8s/app-statefulset.yaml` — StatefulSet с PVC для персистентного хранения
-
-## Примечание
-
-Скрипт `deploy.sh` использует `docker build` и `kubectl apply -f k8s/`.
-Если ваш кластер Kubernetes не имеет доступа к локальному Docker-образу, загрузите образ в реестр или используйте `kind load docker-image custom-app:latest`.
