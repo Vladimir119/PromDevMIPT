@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: log-agent
+spec:
+  selector:
+    matchLabels:
+      app: log-agent
+  template:
+    metadata:
+      labels:
+        app: log-agent
+    spec:
+      containers:
+      - name: log-agent
+        image: alpine:3.18
+        command:
+        - sh
+        - -c
+        - |
+          while true; do
+            echo "=== log-agent $(date -u) ==="
+            find /var/log/pods -type f | sort | while read -r file; do
+              if echo "$file" | grep -E "(custom-app|app)" >/dev/null 2>&1; then
+                echo "---- $file ----"
+                tail -n 20 "$file" || true
+              fi
+            done
+            sleep 60
+          done
+        volumeMounts:
+        - name: pods-logs
+          mountPath: /var/log/pods
+          readOnly: true
+      volumes:
+      - name: pods-logs
+        hostPath:
+          path: /var/log/pods
+          type: Directory

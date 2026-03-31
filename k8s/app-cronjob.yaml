@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: app-log-archiver
+spec:
+  schedule: "*/10 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: archiver
+            image: alpine:3.18
+            command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache curl tar >/dev/null 2>&1
+              ts=$(date +%Y%m%d%H%M%S)
+              mkdir -p /tmp
+              curl -s http://app-service:5000/logs > /tmp/app-logs-${ts}.log
+              tar -czf /tmp/app-logs-${ts}.tar.gz -C /tmp app-logs-${ts}.log
+              echo "Created archive: /tmp/app-logs-${ts}.tar.gz"
+          restartPolicy: OnFailure

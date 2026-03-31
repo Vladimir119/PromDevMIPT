@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: app-stateful
+spec:
+  serviceName: app-stateful
+  replicas: 1
+  selector:
+    matchLabels:
+      app: custom-app-stateful
+  template:
+    metadata:
+      labels:
+        app: custom-app-stateful
+    spec:
+      containers:
+      - name: custom-app
+        image: custom-app:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: app-storage
+          mountPath: /app/logs
+        - name: app-config
+          mountPath: /app/config
+      volumes:
+      - name: app-config
+        configMap:
+          name: app-config
+  volumeClaimTemplates:
+  - metadata:
+      name: app-storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
